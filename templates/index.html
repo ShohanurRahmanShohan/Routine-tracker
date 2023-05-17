@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Study Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            margin-bottom: 10px;
+        }
+        p {
+            margin-top: 5px;
+            margin-bottom: 20px;
+        }
+        ul {
+            padding: 0;
+            list-style-type: none;
+        }
+        .routine-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+        .routine-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .routine-item:before {
+            content: "";
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #333;
+            margin-right: 10px;
+        }
+        .activity {
+            font-weight: bold;
+        }
+        .current-activity {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .remaining-time {
+            font-size: 24px;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        .clock {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .clock {
+            font-size: 24px;
+            font-weight: bold;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .flip {
+            transform: rotateY(360deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Study Tracker</h1>
+        
+        <div class="current-activity">
+            <h2>Current Activity:</h2>
+            <p class="activity">{{ activity }}</p>
+            <h2>Time Remaining:</h2>
+            <p class="remaining-time">
+                <span class="clock" id="clock">{{ remaining_time }}</span>
+            </p>
+        </div>
+
+        <div class="routine-container">
+            <h2>Today's Routine:</h2>
+            <ul>
+                {% for time_slot in routine %}
+                    <li class="routine-item">{{ time_slot }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <script>
+        function countdown() {
+            var remainingTimeElement = document.getElementById("clock");
+            var remainingTime = remainingTimeElement.innerText;
+    
+            // Extract hours and minutes from the remaining time
+            var timeParts = remainingTime.split(":");
+            var hours = parseInt(timeParts[0]);
+            var minutes = parseInt(timeParts[1]);
+    
+            // Convert hours and minutes to total minutes
+            var totalMinutes = hours * 60 + minutes;
+    
+            // Update the remaining time every second
+            var countdownInterval = setInterval(function() {
+                // Calculate new hours and minutes
+                hours = Math.floor(totalMinutes / 60);
+                minutes = totalMinutes % 60;
+    
+                // Add leading zeros if necessary
+                var formattedTime = (hours < 10 ? "0" : "") + hours + ":" + (minutes < 10 ? "0" : "") + minutes;
+    
+                // Update the remaining time element
+                remainingTimeElement.innerText = formattedTime;
+    
+                // Decrease the total minutes
+                totalMinutes--;
+                if (totalMinutes < 10){
+                    playAudio()
+                }
+                // If the remaining time is over, refresh the page
+                if (totalMinutes < 0) {
+                    clearInterval(countdownInterval);
+                    location.reload();
+                }
+            }, 1000); // 1000 milliseconds = 1 second
+        }
+    
+        // Call the countdown function when the page finishes loading
+        window.onload = function() {
+            countdown();
+            animateClock();
+        };
+        function playAudio() {
+            const audio = new Audio("{{ url_for('static', filename='sound.wav') }}");
+         audio.play();
+        }
+
+        function animateClock() {
+            var clockElement = document.getElementById("clock");
+    
+            // Apply animation every second
+            setInterval(function() {
+                clockElement.classList.toggle("flip");
+            }, 1000);
+        }
+    </script>
+    
+   
+</body>
+</html>
